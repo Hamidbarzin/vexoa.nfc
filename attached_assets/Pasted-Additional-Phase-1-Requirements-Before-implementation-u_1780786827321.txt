@@ -1,0 +1,171 @@
+Additional Phase 1 Requirements
+
+Before implementation, update the architecture with the following requirements.
+
+==================================================
+
+1. Owner Self Management
+
+Owners must be able to edit their own profile.
+
+Add:
+
+/profile/settings
+
+Owner can update:
+
+* Name
+* Title
+* Company
+* Bio
+* Profile Photo
+* Phone
+* Email
+* Website
+* Social Links
+* City
+* Industry
+
+Future-ready architecture required.
+
+==================================================
+
+2. NFC Token System
+
+Every NFC card must have a unique secure token.
+
+Example:
+
+/u/VX-8F4A92K
+
+or
+
+/profile/VX-8F4A92K
+
+Requirements:
+
+* Auto-generate token
+* Token must be unique
+* Token linked to owner
+* Token stored in database
+
+Table:
+
+nfc_cards
+
+* id
+* owner_id
+* token
+* status
+* created_at
+
+==================================================
+
+3. Automatic NFC Provisioning
+
+Admin creates Owner
+↓
+System automatically creates NFC token
+↓
+Profile URL generated
+↓
+Ready to write on NFC card
+
+No manual token creation.
+
+==================================================
+
+4. Sponsor Creative Upload
+
+Admin must be able to upload Sponsor assets.
+
+Sponsor record should support:
+
+* Logo
+* Background Image
+* Teaser Image
+* CTA Text
+* CTA URL
+* Tagline
+
+Storage can be local for Phase 1.
+
+Later:
+S3 / Cloud Storage.
+
+==================================================
+
+5. CRM Foundation
+
+This project will become our CRM.
+
+Prepare architecture for future:
+
+Owners
+Sponsors
+Leads
+Activities
+
+Add:
+
+lead_notes
+activity_log
+
+Even if not fully used yet.
+
+==================================================
+
+6. Lead Attribution
+
+Every lead must store:
+
+* Sponsor
+* Owner
+* Source Token
+* Source Username
+* Timestamp
+
+We must know exactly which NFC card generated the lead.
+
+==================================================
+
+7. Future Architecture Rule
+
+Do NOT build a simple NFC card app.
+
+The system must be designed so it can later grow into:
+
+* CRM
+* Sponsor Platform
+* Owner Network
+* Analytics Platform
+
+==================================================
+
+Updated MVP Flow
+
+Admin Creates Owner
+↓
+System Creates NFC Token
+↓
+Owner Edits Profile
+↓
+NFC Tap
+↓
+Sponsor Teaser
+↓
+Lead Form
+↓
+Lead Saved
+↓
+Owner Profile
+↓
+Admin CRM Lead List
+
+==================================================
+
+Before coding:
+
+Update the database schema and file structure with these requirements and show the revised architecture plan.
+
+Then wait for approval.
