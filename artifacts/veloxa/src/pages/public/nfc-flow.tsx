@@ -8,6 +8,31 @@ import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
+const KNOWN_DOMAINS: Record<string, string> = {
+  "linkedin.com": "LinkedIn",
+  "github.com": "GitHub",
+  "instagram.com": "Instagram",
+  "twitter.com": "Twitter",
+  "x.com": "X",
+  "t.me": "Telegram",
+  "wa.me": "WhatsApp",
+  "youtube.com": "YouTube",
+  "behance.net": "Behance",
+  "dribbble.com": "Dribbble",
+};
+
+function getLinkLabel(url: string): string {
+  try {
+    const hostname = new URL(url.startsWith("http") ? url : `https://${url}`).hostname.replace(/^www\./, "");
+    for (const [domain, label] of Object.entries(KNOWN_DOMAINS)) {
+      if (hostname.includes(domain)) return label;
+    }
+    return hostname;
+  } catch {
+    return "Link";
+  }
+}
+
 const leadSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email is required"),
@@ -303,7 +328,7 @@ export default function NfcFlow() {
                   )}
                   {owner.website && (
                     <a
-                      href={owner.website}
+                      href={owner.website.startsWith("http") ? owner.website : `https://${owner.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="h-12 flex flex-col items-center justify-center gap-1 rounded-xl text-xs font-medium text-cyan-300 transition-all"
@@ -314,7 +339,7 @@ export default function NfcFlow() {
                       }}
                     >
                       <Globe className="h-4 w-4" />
-                      Website
+                      {getLinkLabel(owner.website)}
                     </a>
                   )}
                   {owner.email && (
