@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "VELOXA"
+version = "1.0.0"
+id = "artifacts/veloxa"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18117
+
+[services.development]
+run = "pnpm --filter @workspace/veloxa run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/veloxa", "run", "build" ]
+publicDir = "artifacts/veloxa/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18117"
+BASE_PATH = "/"

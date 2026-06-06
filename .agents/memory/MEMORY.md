@@ -1,0 +1,1 @@
+- [VELOXA Architecture](veloxa-architecture.md) — NFC card platform: 6-table DB, token format VX-XXXXXXX, /u/:token flow → Sponsor Teaser → Lead Form → Owner Profile
