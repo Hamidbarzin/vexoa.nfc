@@ -1,7 +1,7 @@
 import { useParams } from "wouter";
 import { useState } from "react";
 import { useGetOwnerByToken, useMatchSponsor, useCreateSponsorLead } from "@workspace/api-client-react";
-import { Loader2, ArrowRight, MoreHorizontal, Globe, Mail, Lock, Download, Phone, MapPin, Briefcase } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, MoreHorizontal, Globe, Mail, Lock, Download, Phone, MapPin, Briefcase } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -195,6 +195,13 @@ export default function NfcFlow() {
             className="min-h-[100dvh] flex flex-col justify-center px-6 py-12"
           >
             <div className="max-w-sm w-full mx-auto">
+              <button
+                onClick={() => setStep("teaser")}
+                className="flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors mb-8 text-sm"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
               <div className="flex justify-center mb-8">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.3)" }}>
                   <span className="text-lg font-bold text-cyan-400">V</span>
@@ -249,6 +256,13 @@ export default function NfcFlow() {
           >
             {/* Top bar */}
             <div className="flex items-start justify-between mb-6">
+              <button
+                onClick={() => setStep(sponsor ? "form" : "teaser")}
+                className="w-11 h-11 rounded-2xl flex items-center justify-center transition-opacity hover:opacity-70"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+              >
+                <ArrowLeft className="h-5 w-5 text-white/60" />
+              </button>
               <div
                 className="w-11 h-11 rounded-2xl flex items-center justify-center"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
