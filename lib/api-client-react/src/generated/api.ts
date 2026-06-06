@@ -22,9 +22,11 @@ import type {
 import type {
   AdminGetLeadsParams,
   AdminStats,
+  CardStatusUpdate,
   HealthStatus,
   LeadStatusUpdate,
   MatchSponsorParams,
+  NfcCardDetail,
   Owner,
   OwnerInput,
   OwnerUpdate,
@@ -879,6 +881,155 @@ export const useAdminCreateSponsor = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAdminCreateSponsorMutationOptions(options));
+    }
+
+export const getAdminGetCardsUrl = () => {
+
+
+
+
+  return `/api/admin/cards`
+}
+
+/**
+ * @summary Get all NFC cards
+ */
+export const adminGetCards = async ( options?: RequestInit): Promise<NfcCardDetail[]> => {
+
+  return customFetch<NfcCardDetail[]>(getAdminGetCardsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetCardsQueryKey = () => {
+    return [
+    `/api/admin/cards`
+    ] as const;
+    }
+
+
+export const getAdminGetCardsQueryOptions = <TData = Awaited<ReturnType<typeof adminGetCards>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetCardsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetCards>>> = ({ signal }) => adminGetCards({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetCards>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetCardsQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetCards>>>
+export type AdminGetCardsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all NFC cards
+ */
+
+export function useAdminGetCards<TData = Awaited<ReturnType<typeof adminGetCards>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetCardsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAdminUpdateCardStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/cards/${id}/status`
+}
+
+/**
+ * @summary Update NFC card status
+ */
+export const adminUpdateCardStatus = async (id: number,
+    cardStatusUpdate: CardStatusUpdate, options?: RequestInit): Promise<NfcCardDetail> => {
+
+  return customFetch<NfcCardDetail>(getAdminUpdateCardStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      cardStatusUpdate,)
+  }
+);}
+
+
+
+
+export const getAdminUpdateCardStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCardStatus>>, TError,{id: number;data: BodyType<CardStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCardStatus>>, TError,{id: number;data: BodyType<CardStatusUpdate>}, TContext> => {
+
+const mutationKey = ['adminUpdateCardStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateCardStatus>>, {id: number;data: BodyType<CardStatusUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  adminUpdateCardStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateCardStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateCardStatus>>>
+    export type AdminUpdateCardStatusMutationBody = BodyType<CardStatusUpdate>
+    export type AdminUpdateCardStatusMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update NFC card status
+ */
+export const useAdminUpdateCardStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCardStatus>>, TError,{id: number;data: BodyType<CardStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateCardStatus>>,
+        TError,
+        {id: number;data: BodyType<CardStatusUpdate>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateCardStatusMutationOptions(options));
     }
 
 export const getAdminGetStatsUrl = () => {

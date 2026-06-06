@@ -233,6 +233,46 @@ paths:
               schema:
                 $ref: "#/components/schemas/Sponsor"
 
+  /admin/cards:
+    get:
+      operationId: adminGetCards
+      tags: [admin]
+      summary: Get all NFC cards
+      responses:
+        "200":
+          description: List of NFC cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NfcCardDetail"
+
+  /admin/cards/{id}/status:
+    patch:
+      operationId: adminUpdateCardStatus
+      tags: [admin]
+      summary: Update NFC card status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardStatusUpdate"
+      responses:
+        "200":
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NfcCardDetail"
+
   /admin/stats:
     get:
       operationId: adminGetStats
@@ -494,6 +534,34 @@ components:
           type: ["string", "null"]
 
     LeadStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    NfcCardDetail:
+      type: object
+      required: [id, ownerId, token, status, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: integer
+        token:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+        ownerName:
+          type: ["string", "null"]
+        ownerUsername:
+          type: ["string", "null"]
+        profileUrl:
+          type: string
+
+    CardStatusUpdate:
       type: object
       required: [status]
       properties:

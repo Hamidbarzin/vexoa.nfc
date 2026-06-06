@@ -13,6 +13,8 @@ import {
   AdminUpdateLeadStatusBody,
   AdminCreateOwnerBody,
   AdminCreateSponsorBody,
+  AdminUpdateCardStatusParams,
+  AdminUpdateCardStatusBody,
 } from "@workspace/api-zod";
 
 const router = Router();
@@ -258,6 +260,77 @@ router.post("/admin/sponsors", async (req, res) => {
     ctaText: sponsor[0].ctaText,
     ctaUrl: sponsor[0].ctaUrl,
     targetCategories: sponsor[0].targetCategories,
+  });
+});
+
+router.get("/admin/cards", async (req, res) => {
+  const cards = await db
+    .select({
+      id: nfcCardsTable.id,
+      ownerId: nfcCardsTable.ownerId,
+      token: nfcCardsTable.token,
+      status: nfcCardsTable.status,
+      createdAt: nfcCardsTable.createdAt,
+      ownerName: ownersTable.name,
+      ownerUsername: ownersTable.username,
+    })
+    .from(nfcCardsTable)
+    .leftJoin(ownersTable, eq(nfcCardsTable.ownerId, ownersTable.id))
+    .orderBy(desc(nfcCardsTable.createdAt));
+
+  res.json(
+    cards.map((c) => ({
+      id: c.id,
+      ownerId: c.ownerId,
+      token: c.token,
+      status: c.status,
+      createdAt: c.createdAt.toISOString(),
+      ownerName: c.ownerName,
+      ownerUsername: c.ownerUsername,
+      profileUrl: `/u/${c.token}`,
+    }))
+  );
+});
+
+router.patch("/admin/cards/:id/status", async (req, res) => {
+  const params = AdminUpdateCardStatusParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Invalid params" });
+    return;
+  }
+
+  const body = AdminUpdateCardStatusBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: "Invalid body" });
+    return;
+  }
+
+  const updated = await db
+    .update(nfcCardsTable)
+    .set({ status: body.data.status })
+    .where(eq(nfcCardsTable.id, params.data.id))
+    .returning();
+
+  if (!updated[0]) {
+    res.status(404).json({ error: "Card not found" });
+    return;
+  }
+
+  const owner = await db
+    .select()
+    .from(ownersTable)
+    .where(eq(ownersTable.id, updated[0].ownerId))
+    .limit(1);
+
+  res.json({
+    id: updated[0].id,
+    ownerId: updated[0].ownerId,
+    token: updated[0].token,
+    status: updated[0].status,
+    createdAt: updated[0].createdAt.toISOString(),
+    ownerName: owner[0]?.name ?? null,
+    ownerUsername: owner[0]?.username ?? null,
+    profileUrl: `/u/${updated[0].token}`,
   });
 });
 

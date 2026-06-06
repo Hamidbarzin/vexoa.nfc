@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
+import Landing from "@/pages/landing";
+import AdminCards from "@/pages/admin/cards";
 import AdminLeads from "@/pages/admin/leads";
 import AdminOwners from "@/pages/admin/owners";
 import AdminSponsors from "@/pages/admin/sponsors";
@@ -34,7 +36,7 @@ function AdminRoute({ component: Component }: { component: React.ComponentType }
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={RootRedirect} />
+      <Route path="/" component={Landing} />
       
       {/* Public Routes */}
       <Route path="/u/:token" component={NfcFlow} />
@@ -45,6 +47,9 @@ function Router() {
       </Route>
       <Route path="/admin/owners">
         <AdminRoute component={AdminOwners} />
+      </Route>
+      <Route path="/admin/cards">
+        <AdminRoute component={AdminCards} />
       </Route>
       <Route path="/admin/sponsors">
         <AdminRoute component={AdminSponsors} />

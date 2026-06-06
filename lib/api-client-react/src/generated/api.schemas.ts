@@ -179,6 +179,23 @@ export interface LeadStatusUpdate {
   status: string;
 }
 
+export interface NfcCardDetail {
+  id: number;
+  ownerId: number;
+  token: string;
+  status: string;
+  createdAt: string;
+  /** @nullable */
+  ownerName?: string | null;
+  /** @nullable */
+  ownerUsername?: string | null;
+  profileUrl?: string;
+}
+
+export interface CardStatusUpdate {
+  status: string;
+}
+
 export type AdminStatsLeadsByStatusItem = {
   status: string;
   count: number;

@@ -244,6 +244,45 @@ export const AdminCreateSponsorBody = zod.object({
 
 
 /**
+ * @summary Get all NFC cards
+ */
+export const AdminGetCardsResponseItem = zod.object({
+  "id": zod.number(),
+  "ownerId": zod.number(),
+  "token": zod.string(),
+  "status": zod.string(),
+  "createdAt": zod.string(),
+  "ownerName": zod.string().nullish(),
+  "ownerUsername": zod.string().nullish(),
+  "profileUrl": zod.string().optional()
+})
+export const AdminGetCardsResponse = zod.array(AdminGetCardsResponseItem)
+
+
+/**
+ * @summary Update NFC card status
+ */
+export const AdminUpdateCardStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AdminUpdateCardStatusBody = zod.object({
+  "status": zod.string()
+})
+
+export const AdminUpdateCardStatusResponse = zod.object({
+  "id": zod.number(),
+  "ownerId": zod.number(),
+  "token": zod.string(),
+  "status": zod.string(),
+  "createdAt": zod.string(),
+  "ownerName": zod.string().nullish(),
+  "ownerUsername": zod.string().nullish(),
+  "profileUrl": zod.string().optional()
+})
+
+
+/**
  * @summary Get dashboard stats
  */
 export const AdminGetStatsResponse = zod.object({

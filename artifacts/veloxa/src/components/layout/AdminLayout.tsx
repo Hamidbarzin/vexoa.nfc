@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, UserCircle, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, UserCircle, Briefcase, CreditCard } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -7,6 +7,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/admin/leads", label: "Leads", icon: LayoutDashboard },
     { href: "/admin/owners", label: "Owners", icon: Users },
+    { href: "/admin/cards", label: "Cards", icon: CreditCard },
     { href: "/admin/sponsors", label: "Sponsors", icon: Briefcase },
     { href: "/profile/settings", label: "My Profile", icon: UserCircle },
   ];
