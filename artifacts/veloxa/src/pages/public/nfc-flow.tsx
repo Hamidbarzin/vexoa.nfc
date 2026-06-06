@@ -1,7 +1,7 @@
 import { useParams } from "wouter";
 import { useState } from "react";
 import { useGetOwnerByToken, useMatchSponsor, useCreateSponsorLead } from "@workspace/api-client-react";
-import { Loader2, ArrowRight, MoreHorizontal, Globe, Mail, Lock, Download } from "lucide-react";
+import { Loader2, ArrowRight, MoreHorizontal, Globe, Mail, Lock, Download, Phone, MapPin, Briefcase } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -220,22 +220,16 @@ export default function NfcFlow() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-[100dvh] flex flex-col px-5 pt-10 pb-8"
+            className="min-h-[100dvh] flex flex-col px-5 pt-10 pb-8 relative"
           >
             {/* Top bar */}
-            <div className="flex items-start justify-between mb-8">
+            <div className="flex items-start justify-between mb-6">
               <div
                 className="w-11 h-11 rounded-2xl flex items-center justify-center"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
               >
                 <span className="text-base font-bold text-white">V</span>
               </div>
-
-              <div className="flex-1 mx-4 text-center">
-                <h1 className="text-2xl font-bold text-white leading-tight">{owner.name}</h1>
-                <p className="text-sm text-white/40 mt-0.5">Loyal since {joinYear}</p>
-              </div>
-
               <button
                 className="w-11 h-11 rounded-2xl flex items-center justify-center"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
@@ -244,82 +238,145 @@ export default function NfcFlow() {
               </button>
             </div>
 
-            {/* Glass Card */}
-            <div
-              className="rounded-2xl p-5 mb-4"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                backdropFilter: "blur(24px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <p className="text-xs text-white/40 font-medium tracking-wider uppercase mb-1">VELOXA Network</p>
-
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-bold text-white">{owner.title || "Member"}</span>
-              </div>
-
-              {/* Gradient bar */}
-              <div className="h-1 rounded-full mb-5" style={{ background: "linear-gradient(90deg, #e040fb 0%, #00e5ff 100%)" }} />
-
-              {/* Website + Email row */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                {owner.website ? (
-                  <a
-                    href={owner.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-medium text-cyan-300 transition-all"
-                    style={{
-                      background: "rgba(0,229,255,0.05)",
-                      border: "1px solid #00e5ff",
-                      boxShadow: "0 0 12px rgba(0,229,255,0.25), inset 0 0 12px rgba(0,229,255,0.05)",
-                    }}
-                  >
-                    <Globe className="h-4 w-4" />
-                    Website
-                  </a>
+            {/* ① Avatar with gradient border */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="p-[2px] rounded-full mb-4" style={{ background: "linear-gradient(135deg, #e040fb, #00e5ff)" }}>
+                {owner.avatarUrl ? (
+                  <img
+                    src={owner.avatarUrl}
+                    alt={owner.name}
+                    className="w-24 h-24 rounded-full object-cover"
+                    style={{ background: "#051a18" }}
+                  />
                 ) : (
-                  <div className="h-12 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }} />
-                )}
-
-                {owner.email ? (
-                  <a
-                    href={`mailto:${owner.email}`}
-                    className="h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-medium text-cyan-300 transition-all"
-                    style={{
-                      background: "rgba(0,229,255,0.05)",
-                      border: "1px solid #00e5ff",
-                      boxShadow: "0 0 12px rgba(0,229,255,0.25), inset 0 0 12px rgba(0,229,255,0.05)",
-                    }}
+                  <div
+                    className="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold text-white"
+                    style={{ background: "linear-gradient(135deg, #051a18, #0a2a28)" }}
                   >
-                    <Mail className="h-4 w-4" />
-                    Email
-                  </a>
-                ) : (
-                  <div className="h-12 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }} />
+                    {owner.name.charAt(0)}
+                  </div>
                 )}
               </div>
+              <h1 className="text-2xl font-bold text-white leading-tight text-center">{owner.name}</h1>
+              <p className="text-sm text-white/40 mt-0.5">Loyal since {joinYear}</p>
+            </div>
 
-              {/* Save Contact */}
-              <button
-                onClick={saveContact}
-                className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-medium text-pink-300 transition-all"
+            {/* ③ Ambient glow + Glass Card */}
+            <div className="relative mb-4">
+              {/* glow behind card */}
+              <div
+                className="absolute inset-0 rounded-3xl blur-2xl opacity-30 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse at 30% 50%, #e040fb 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, #00e5ff 0%, transparent 60%)" }}
+              />
+              <div
+                className="relative rounded-2xl p-5"
                 style={{
-                  background: "rgba(224,64,251,0.05)",
-                  border: "1px solid #e040fb",
-                  boxShadow: "0 0 12px rgba(224,64,251,0.25), inset 0 0 12px rgba(224,64,251,0.05)",
+                  background: "rgba(255,255,255,0.05)",
+                  backdropFilter: "blur(24px)",
+                  border: "1px solid rgba(255,255,255,0.1)",
                 }}
               >
-                <Download className="h-4 w-4" />
-                Save Contact
-              </button>
+                <p className="text-xs text-white/40 font-medium tracking-wider uppercase mb-1">VELOXA Network</p>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-white">{owner.title || "Member"}</span>
+                  {owner.company && <span className="text-white/40 text-sm ml-2">@ {owner.company}</span>}
+                </div>
+
+                {/* Gradient bar */}
+                <div className="h-[2px] rounded-full mb-5" style={{ background: "linear-gradient(90deg, #e040fb 0%, #00e5ff 100%)" }} />
+
+                {/* ② Phone + Website + Email — 3 buttons */}
+                <div className={`grid gap-3 mb-3 ${[owner.phone, owner.website, owner.email].filter(Boolean).length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+                  {owner.phone && (
+                    <a
+                      href={`tel:${owner.phone}`}
+                      className="h-12 flex flex-col items-center justify-center gap-1 rounded-xl text-xs font-medium text-cyan-300 transition-all"
+                      style={{
+                        background: "rgba(0,229,255,0.05)",
+                        border: "1px solid #00e5ff",
+                        boxShadow: "0 0 12px rgba(0,229,255,0.2), inset 0 0 8px rgba(0,229,255,0.04)",
+                      }}
+                    >
+                      <Phone className="h-4 w-4" />
+                      Phone
+                    </a>
+                  )}
+                  {owner.website && (
+                    <a
+                      href={owner.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-12 flex flex-col items-center justify-center gap-1 rounded-xl text-xs font-medium text-cyan-300 transition-all"
+                      style={{
+                        background: "rgba(0,229,255,0.05)",
+                        border: "1px solid #00e5ff",
+                        boxShadow: "0 0 12px rgba(0,229,255,0.2), inset 0 0 8px rgba(0,229,255,0.04)",
+                      }}
+                    >
+                      <Globe className="h-4 w-4" />
+                      Website
+                    </a>
+                  )}
+                  {owner.email && (
+                    <a
+                      href={`mailto:${owner.email}`}
+                      className="h-12 flex flex-col items-center justify-center gap-1 rounded-xl text-xs font-medium text-cyan-300 transition-all"
+                      style={{
+                        background: "rgba(0,229,255,0.05)",
+                        border: "1px solid #00e5ff",
+                        boxShadow: "0 0 12px rgba(0,229,255,0.2), inset 0 0 8px rgba(0,229,255,0.04)",
+                      }}
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </a>
+                  )}
+                </div>
+
+                {/* Save Contact */}
+                <button
+                  onClick={saveContact}
+                  className="w-full h-12 flex items-center justify-center gap-2 rounded-xl text-sm font-medium text-pink-300 transition-all"
+                  style={{
+                    background: "rgba(224,64,251,0.05)",
+                    border: "1px solid #e040fb",
+                    boxShadow: "0 0 12px rgba(224,64,251,0.25), inset 0 0 12px rgba(224,64,251,0.05)",
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                  Save Contact
+                </button>
+              </div>
             </div>
 
             {/* Bio */}
             {owner.bio && (
               <div className="px-1 mb-4">
-                <p className="text-sm text-white/40 font-light leading-relaxed text-center italic">"{owner.bio}"</p>
+                <p className="text-sm text-white/35 font-light leading-relaxed text-center italic">"{owner.bio}"</p>
+              </div>
+            )}
+
+            {/* ④ City + Industry chips */}
+            {(owner.city || owner.industry) && (
+              <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+                {owner.city && (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-white/50"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    <MapPin className="h-3 w-3" />
+                    {owner.city}
+                  </div>
+                )}
+                {owner.industry && (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-white/50"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  >
+                    <Briefcase className="h-3 w-3" />
+                    {owner.industry}
+                  </div>
+                )}
               </div>
             )}
 
@@ -328,10 +385,7 @@ export default function NfcFlow() {
               <button
                 onClick={() => setStep("teaser")}
                 className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all mt-auto"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                }}
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <Lock className="h-4 w-4 text-white/30 shrink-0" />
                 <span className="text-sm text-white/40">Sponsored · </span>
