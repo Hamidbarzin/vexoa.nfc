@@ -49,8 +49,8 @@ export default function NfcFlow() {
   const { data: owner, isLoading: ownerLoading, isError: ownerError } = useGetOwnerByToken(token || "");
 
   const { data: sponsor, isLoading: sponsorLoading } = useMatchSponsor(
-    { ownerId: owner?.id as number },
-    { query: { enabled: !!owner?.id } }
+    { ownerId: owner?.id ?? 0 },
+    { query: { enabled: !!owner?.id } as any }
   );
 
   const createLead = useCreateSponsorLead();
@@ -147,6 +147,9 @@ export default function NfcFlow() {
       </div>
     );
   }
+
+  // TypeScript narrowing — all early returns above guarantee owner is defined here
+  if (!owner) return null;
 
   const joinYear = owner.createdAt ? new Date(owner.createdAt).getFullYear() : new Date().getFullYear();
 

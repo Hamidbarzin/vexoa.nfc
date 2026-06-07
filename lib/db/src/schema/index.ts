@@ -4,3 +4,5 @@ export * from "./sponsors";
 export * from "./sponsor_leads";
 export * from "./lead_notes";
 export * from "./activity_log";
+export * from "./users";
+export * from "./crm_contacts";

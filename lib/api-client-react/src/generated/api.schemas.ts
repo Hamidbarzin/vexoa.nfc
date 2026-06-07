@@ -33,11 +33,16 @@ export interface Owner {
   /** @nullable */
   website?: string | null;
   /** @nullable */
+  instagram?: string | null;
+  /** @nullable */
+  linkedin?: string | null;
+  /** @nullable */
   city?: string | null;
   /** @nullable */
   industry?: string | null;
   /** @nullable */
   socialLinks?: OwnerSocialLinks;
+  createdAt?: string;
 }
 
 /**
@@ -97,6 +102,8 @@ export interface OwnerUpdate {
   phone?: string;
   email?: string;
   website?: string;
+  instagram?: string;
+  linkedin?: string;
   city?: string;
   industry?: string;
   socialLinks?: OwnerUpdateSocialLinks;
@@ -181,19 +188,84 @@ export interface LeadStatusUpdate {
 
 export interface NfcCardDetail {
   id: number;
-  ownerId: number;
+  /** @nullable */
+  ownerId?: number | null;
   token: string;
   status: string;
+  /** @nullable */
+  activatedAt?: string | null;
   createdAt: string;
   /** @nullable */
   ownerName?: string | null;
   /** @nullable */
   ownerUsername?: string | null;
-  profileUrl?: string;
+  /** @nullable */
+  profileUrl?: string | null;
 }
 
 export interface CardStatusUpdate {
   status: string;
+}
+
+export interface CardStatus {
+  token: string;
+  status: string;
+  /** @nullable */
+  ownerId?: number | null;
+}
+
+export interface ActivationInput {
+  name: string;
+  company?: string;
+  title?: string;
+  phone?: string;
+  email: string;
+  website?: string;
+  instagram?: string;
+  linkedin?: string;
+  city?: string;
+  industry?: string;
+  bio?: string;
+  avatarUrl?: string;
+  password: string;
+}
+
+export interface ActivationResult {
+  ownerId: number;
+  token: string;
+  profileUrl: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface AuthResult {
+  ownerId: number;
+  name: string;
+  email: string;
+}
+
+export interface CrmContact {
+  id: number;
+  /** @nullable */
+  ownerId?: number | null;
+  name: string;
+  /** @nullable */
+  company?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  industry?: string | null;
+  source: string;
+  /** @nullable */
+  nfcToken?: string | null;
+  createdAt: string;
 }
 
 export type AdminStatsLeadsByStatusItem = {

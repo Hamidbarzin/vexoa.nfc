@@ -5,9 +5,10 @@ import { ownersTable } from "./owners";
 
 export const nfcCardsTable = pgTable("nfc_cards", {
   id: serial("id").primaryKey(),
-  ownerId: integer("owner_id").notNull().references(() => ownersTable.id),
+  ownerId: integer("owner_id").references(() => ownersTable.id),
   token: text("token").notNull().unique(),
-  status: text("status").notNull().default("active"),
+  status: text("status").notNull().default("blank"),
+  activatedAt: timestamp("activated_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

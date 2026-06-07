@@ -11,6 +11,9 @@ tags:
   - name: owners
   - name: sponsors
   - name: leads
+  - name: cards
+  - name: auth
+  - name: me
   - name: admin
 
 paths:
@@ -112,6 +115,122 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SponsorLead"
+
+  /cards/{token}/status:
+    get:
+      operationId: getCardStatus
+      tags: [cards]
+      summary: Check if a card is blank or active
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Card status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardStatus"
+        "404":
+          description: Card not found
+
+  /cards/{token}/activate:
+    post:
+      operationId: activateCard
+      tags: [cards]
+      summary: Activate a blank NFC card and create owner account
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivationInput"
+      responses:
+        "201":
+          description: Card activated, owner and account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivationResult"
+        "400":
+          description: Card already active or validation error
+        "404":
+          description: Card not found
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Owner login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [me]
+      summary: Get logged-in owner profile
+      responses:
+        "200":
+          description: Owner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+        "401":
+          description: Not authenticated
+
+  /me/profile:
+    patch:
+      operationId: updateMyProfile
+      tags: [me]
+      summary: Update logged-in owner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OwnerUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+        "401":
+          description: Not authenticated
 
   /admin/leads:
     get:
@@ -247,6 +366,17 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/NfcCardDetail"
+    post:
+      operationId: adminCreateBlankCard
+      tags: [admin]
+      summary: Create a blank unactivated NFC card
+      responses:
+        "201":
+          description: Blank card created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NfcCardDetail"
 
   /admin/cards/{id}/status:
     patch:
@@ -286,6 +416,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdminStats"
 
+  /admin/crm/contacts:
+    get:
+      operationId: adminGetCrmContacts
+      tags: [admin]
+      summary: Get all CRM contacts (activated owners)
+      responses:
+        "200":
+          description: List of CRM contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrmContact"
+
 components:
   schemas:
     HealthStatus:
@@ -319,12 +464,18 @@ components:
           type: ["string", "null"]
         website:
           type: ["string", "null"]
+        instagram:
+          type: ["string", "null"]
+        linkedin:
+          type: ["string", "null"]
         city:
           type: ["string", "null"]
         industry:
           type: ["string", "null"]
         socialLinks:
           type: ["object", "null"]
+        createdAt:
+          type: string
 
     OwnerWithCard:
       type: object
@@ -404,6 +555,10 @@ components:
         email:
           type: string
         website:
+          type: string
+        instagram:
+          type: string
+        linkedin:
           type: string
         city:
           type: string
@@ -542,16 +697,18 @@ components:
 
     NfcCardDetail:
       type: object
-      required: [id, ownerId, token, status, createdAt]
+      required: [id, token, status, createdAt]
       properties:
         id:
           type: integer
         ownerId:
-          type: integer
+          type: ["integer", "null"]
         token:
           type: string
         status:
           type: string
+        activatedAt:
+          type: ["string", "null"]
         createdAt:
           type: string
         ownerName:
@@ -559,13 +716,113 @@ components:
         ownerUsername:
           type: ["string", "null"]
         profileUrl:
-          type: string
+          type: ["string", "null"]
 
     CardStatusUpdate:
       type: object
       required: [status]
       properties:
         status:
+          type: string
+
+    CardStatus:
+      type: object
+      required: [token, status]
+      properties:
+        token:
+          type: string
+        status:
+          type: string
+        ownerId:
+          type: ["integer", "null"]
+
+    ActivationInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        instagram:
+          type: string
+        linkedin:
+          type: string
+        city:
+          type: string
+        industry:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+        password:
+          type: string
+
+    ActivationResult:
+      type: object
+      required: [ownerId, token, profileUrl]
+      properties:
+        ownerId:
+          type: integer
+        token:
+          type: string
+        profileUrl:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResult:
+      type: object
+      required: [ownerId, name, email]
+      properties:
+        ownerId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+    CrmContact:
+      type: object
+      required: [id, name, source, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: ["integer", "null"]
+        name:
+          type: string
+        company:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        source:
+          type: string
+        nfcToken:
+          type: ["string", "null"]
+        createdAt:
           type: string
 
     AdminStats:

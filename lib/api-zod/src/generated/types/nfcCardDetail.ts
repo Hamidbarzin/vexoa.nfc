@@ -8,13 +8,17 @@
 
 export interface NfcCardDetail {
   id: number;
-  ownerId: number;
+  /** @nullable */
+  ownerId?: number | null;
   token: string;
   status: string;
+  /** @nullable */
+  activatedAt?: string | null;
   createdAt: string;
   /** @nullable */
   ownerName?: string | null;
   /** @nullable */
   ownerUsername?: string | null;
-  profileUrl?: string;
+  /** @nullable */
+  profileUrl?: string | null;
 }

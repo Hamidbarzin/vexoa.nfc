@@ -34,11 +34,14 @@ export const GetOwnerByTokenResponse = zod.object({
   "phone": zod.string().nullish(),
   "email": zod.string().nullish(),
   "website": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "linkedin": zod.string().nullish(),
   "city": zod.string().nullish(),
   "industry": zod.string().nullish(),
   "socialLinks": zod.object({
 
-}).passthrough().nullish()
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
 })
 
 
@@ -58,6 +61,8 @@ export const UpdateOwnerProfileBody = zod.object({
   "phone": zod.string().optional(),
   "email": zod.string().optional(),
   "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "linkedin": zod.string().optional(),
   "city": zod.string().optional(),
   "industry": zod.string().optional(),
   "socialLinks": zod.object({
@@ -76,11 +81,14 @@ export const UpdateOwnerProfileResponse = zod.object({
   "phone": zod.string().nullish(),
   "email": zod.string().nullish(),
   "website": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "linkedin": zod.string().nullish(),
   "city": zod.string().nullish(),
   "industry": zod.string().nullish(),
   "socialLinks": zod.object({
 
-}).passthrough().nullish()
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
 })
 
 
@@ -115,6 +123,127 @@ export const CreateSponsorLeadBody = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().optional()
+})
+
+
+/**
+ * @summary Check if a card is blank or active
+ */
+export const GetCardStatusParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const GetCardStatusResponse = zod.object({
+  "token": zod.string(),
+  "status": zod.string(),
+  "ownerId": zod.number().nullish()
+})
+
+
+/**
+ * @summary Activate a blank NFC card and create owner account
+ */
+export const ActivateCardParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const ActivateCardBody = zod.object({
+  "name": zod.string(),
+  "company": zod.string().optional(),
+  "title": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "linkedin": zod.string().optional(),
+  "city": zod.string().optional(),
+  "industry": zod.string().optional(),
+  "bio": zod.string().optional(),
+  "avatarUrl": zod.string().optional(),
+  "password": zod.string()
+})
+
+
+/**
+ * @summary Owner login with email and password
+ */
+export const LoginBody = zod.object({
+  "email": zod.string(),
+  "password": zod.string()
+})
+
+export const LoginResponse = zod.object({
+  "ownerId": zod.number(),
+  "name": zod.string(),
+  "email": zod.string()
+})
+
+
+/**
+ * @summary Get logged-in owner profile
+ */
+export const GetMeResponse = zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "name": zod.string(),
+  "title": zod.string().nullish(),
+  "company": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "website": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "linkedin": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "industry": zod.string().nullish(),
+  "socialLinks": zod.object({
+
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update logged-in owner profile
+ */
+export const UpdateMyProfileBody = zod.object({
+  "name": zod.string().optional(),
+  "title": zod.string().optional(),
+  "company": zod.string().optional(),
+  "bio": zod.string().optional(),
+  "avatarUrl": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "email": zod.string().optional(),
+  "website": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "linkedin": zod.string().optional(),
+  "city": zod.string().optional(),
+  "industry": zod.string().optional(),
+  "socialLinks": zod.object({
+
+}).passthrough().optional()
+})
+
+export const UpdateMyProfileResponse = zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "name": zod.string(),
+  "title": zod.string().nullish(),
+  "company": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "website": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "linkedin": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "industry": zod.string().nullish(),
+  "socialLinks": zod.object({
+
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
 })
 
 
@@ -248,13 +377,14 @@ export const AdminCreateSponsorBody = zod.object({
  */
 export const AdminGetCardsResponseItem = zod.object({
   "id": zod.number(),
-  "ownerId": zod.number(),
+  "ownerId": zod.number().nullish(),
   "token": zod.string(),
   "status": zod.string(),
+  "activatedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "ownerName": zod.string().nullish(),
   "ownerUsername": zod.string().nullish(),
-  "profileUrl": zod.string().optional()
+  "profileUrl": zod.string().nullish()
 })
 export const AdminGetCardsResponse = zod.array(AdminGetCardsResponseItem)
 
@@ -272,13 +402,14 @@ export const AdminUpdateCardStatusBody = zod.object({
 
 export const AdminUpdateCardStatusResponse = zod.object({
   "id": zod.number(),
-  "ownerId": zod.number(),
+  "ownerId": zod.number().nullish(),
   "token": zod.string(),
   "status": zod.string(),
+  "activatedAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "ownerName": zod.string().nullish(),
   "ownerUsername": zod.string().nullish(),
-  "profileUrl": zod.string().optional()
+  "profileUrl": zod.string().nullish()
 })
 
 
@@ -295,5 +426,24 @@ export const AdminGetStatsResponse = zod.object({
   "count": zod.number()
 })).optional()
 })
+
+
+/**
+ * @summary Get all CRM contacts (activated owners)
+ */
+export const AdminGetCrmContactsResponseItem = zod.object({
+  "id": zod.number(),
+  "ownerId": zod.number().nullish(),
+  "name": zod.string(),
+  "company": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "industry": zod.string().nullish(),
+  "source": zod.string(),
+  "nfcToken": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const AdminGetCrmContactsResponse = zod.array(AdminGetCrmContactsResponseItem)
 
 

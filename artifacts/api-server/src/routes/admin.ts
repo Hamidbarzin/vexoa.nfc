@@ -6,6 +6,7 @@ import {
   nfcCardsTable,
   sponsorsTable,
   sponsorLeadsTable,
+  crmContactsTable,
 } from "@workspace/db/schema";
 import {
   AdminGetLeadsQueryParams,
@@ -270,6 +271,7 @@ router.get("/admin/cards", async (req, res) => {
       ownerId: nfcCardsTable.ownerId,
       token: nfcCardsTable.token,
       status: nfcCardsTable.status,
+      activatedAt: nfcCardsTable.activatedAt,
       createdAt: nfcCardsTable.createdAt,
       ownerName: ownersTable.name,
       ownerUsername: ownersTable.username,
@@ -281,15 +283,48 @@ router.get("/admin/cards", async (req, res) => {
   res.json(
     cards.map((c) => ({
       id: c.id,
-      ownerId: c.ownerId,
+      ownerId: c.ownerId ?? null,
       token: c.token,
       status: c.status,
+      activatedAt: c.activatedAt?.toISOString() ?? null,
       createdAt: c.createdAt.toISOString(),
-      ownerName: c.ownerName,
-      ownerUsername: c.ownerUsername,
-      profileUrl: `/u/${c.token}`,
+      ownerName: c.ownerName ?? null,
+      ownerUsername: c.ownerUsername ?? null,
+      profileUrl: c.ownerId ? `/u/${c.token}` : null,
     }))
   );
+});
+
+router.post("/admin/cards", async (req, res) => {
+  let token = generateNfcToken();
+  let attempts = 0;
+  while (attempts < 10) {
+    const existing = await db
+      .select()
+      .from(nfcCardsTable)
+      .where(eq(nfcCardsTable.token, token))
+      .limit(1);
+    if (existing.length === 0) break;
+    token = generateNfcToken();
+    attempts++;
+  }
+
+  const [card] = await db
+    .insert(nfcCardsTable)
+    .values({ token, status: "blank" })
+    .returning();
+
+  res.status(201).json({
+    id: card!.id,
+    ownerId: null,
+    token: card!.token,
+    status: card!.status,
+    activatedAt: null,
+    createdAt: card!.createdAt.toISOString(),
+    ownerName: null,
+    ownerUsername: null,
+    profileUrl: null,
+  });
 });
 
 router.patch("/admin/cards/:id/status", async (req, res) => {
@@ -316,22 +351,44 @@ router.patch("/admin/cards/:id/status", async (req, res) => {
     return;
   }
 
-  const owner = await db
-    .select()
-    .from(ownersTable)
-    .where(eq(ownersTable.id, updated[0].ownerId))
-    .limit(1);
+  const owner = updated[0].ownerId
+    ? await db.select().from(ownersTable).where(eq(ownersTable.id, updated[0].ownerId)).limit(1)
+    : [];
 
   res.json({
     id: updated[0].id,
-    ownerId: updated[0].ownerId,
+    ownerId: updated[0].ownerId ?? null,
     token: updated[0].token,
     status: updated[0].status,
+    activatedAt: updated[0].activatedAt?.toISOString() ?? null,
     createdAt: updated[0].createdAt.toISOString(),
     ownerName: owner[0]?.name ?? null,
     ownerUsername: owner[0]?.username ?? null,
-    profileUrl: `/u/${updated[0].token}`,
+    profileUrl: updated[0].ownerId ? `/u/${updated[0].token}` : null,
   });
+});
+
+router.get("/admin/crm/contacts", async (req, res) => {
+  const contacts = await db
+    .select()
+    .from(crmContactsTable)
+    .orderBy(desc(crmContactsTable.createdAt));
+
+  res.json(
+    contacts.map((c) => ({
+      id: c.id,
+      ownerId: c.ownerId ?? null,
+      name: c.name,
+      company: c.company ?? null,
+      email: c.email ?? null,
+      phone: c.phone ?? null,
+      city: c.city ?? null,
+      industry: c.industry ?? null,
+      source: c.source,
+      nfcToken: c.nfcToken ?? null,
+      createdAt: c.createdAt.toISOString(),
+    }))
+  );
 });
 
 export default router;

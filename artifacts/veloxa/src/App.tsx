@@ -9,21 +9,21 @@ import AdminCards from "@/pages/admin/cards";
 import AdminLeads from "@/pages/admin/leads";
 import AdminOwners from "@/pages/admin/owners";
 import AdminSponsors from "@/pages/admin/sponsors";
+import AdminCrm from "@/pages/admin/crm";
 import ProfileSettings from "@/pages/profile/settings";
 import NfcFlow from "@/pages/public/nfc-flow";
+import ActivatePage from "@/pages/public/activate";
+import LoginPage from "@/pages/auth/login";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
 
-const queryClient = new QueryClient();
-
-function RootRedirect() {
-  const [, setLocation] = useLocation();
-  useEffect(() => {
-    setLocation("/admin/leads");
-  }, [setLocation]);
-  return null;
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: 30_000,
+    },
+  },
+});
 
 function AdminRoute({ component: Component }: { component: React.ComponentType }) {
   return (
@@ -37,11 +37,15 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      
-      {/* Public Routes */}
+
+      {/* Public NFC routes */}
       <Route path="/u/:token" component={NfcFlow} />
-      
-      {/* Admin / Profile Routes */}
+      <Route path="/activate/:token" component={ActivatePage} />
+
+      {/* Auth */}
+      <Route path="/login" component={LoginPage} />
+
+      {/* Admin */}
       <Route path="/admin/leads">
         <AdminRoute component={AdminLeads} />
       </Route>
@@ -54,6 +58,11 @@ function Router() {
       <Route path="/admin/sponsors">
         <AdminRoute component={AdminSponsors} />
       </Route>
+      <Route path="/admin/crm">
+        <AdminRoute component={AdminCrm} />
+      </Route>
+
+      {/* Profile */}
       <Route path="/profile/settings">
         <AdminRoute component={ProfileSettings} />
       </Route>

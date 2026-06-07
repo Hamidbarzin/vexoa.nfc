@@ -27,11 +27,11 @@ router.get("/owners/:token", async (req, res) => {
 
   let owner;
 
-  if (card.length > 0) {
+  if (card.length > 0 && card[0]!.ownerId != null) {
     const owners = await db
       .select()
       .from(ownersTable)
-      .where(eq(ownersTable.id, card[0].ownerId))
+      .where(eq(ownersTable.id, card[0]!.ownerId))
       .limit(1);
     owner = owners[0];
   } else {
@@ -59,9 +59,12 @@ router.get("/owners/:token", async (req, res) => {
     phone: owner.phone,
     email: owner.email,
     website: owner.website,
+    instagram: owner.instagram,
+    linkedin: owner.linkedin,
     city: owner.city,
     industry: owner.industry,
     socialLinks: owner.socialLinks,
+    createdAt: owner.createdAt.toISOString(),
   });
 });
 

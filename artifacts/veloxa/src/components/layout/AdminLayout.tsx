@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, UserCircle, Briefcase, CreditCard } from "lucide-react";
+import { LayoutDashboard, Users, UserCircle, Briefcase, CreditCard, ContactRound } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -9,8 +9,21 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: "/admin/owners", label: "Owners", icon: Users, color: "#a855f7", glow: "rgba(168,85,247,0.25)" },
     { href: "/admin/cards", label: "Cards", icon: CreditCard, color: "#f97316", glow: "rgba(249,115,22,0.25)" },
     { href: "/admin/sponsors", label: "Sponsors", icon: Briefcase, color: "#ec4899", glow: "rgba(236,72,153,0.25)" },
-    { href: "/profile/settings", label: "My Profile", icon: UserCircle, color: "#34d399", glow: "rgba(52,211,153,0.25)" },
+    { href: "/admin/crm", label: "CRM", icon: ContactRound, color: "#34d399", glow: "rgba(52,211,153,0.25)" },
+    { href: "/profile/settings", label: "My Profile", icon: UserCircle, color: "#a78bfa", glow: "rgba(167,139,250,0.25)" },
   ];
+
+  function getColorComponents(hex: string): string {
+    const map: Record<string, string> = {
+      "#00e5ff": "0,229,255",
+      "#a855f7": "168,85,247",
+      "#f97316": "249,115,22",
+      "#ec4899": "236,72,153",
+      "#34d399": "52,211,153",
+      "#a78bfa": "167,139,250",
+    };
+    return map[hex] ?? "168,85,247";
+  }
 
   return (
     <div className="flex h-screen w-full overflow-hidden relative" style={{ background: "linear-gradient(135deg, #060010 0%, #03000c 35%, #000812 65%, #000510 100%)" }}>
@@ -23,7 +36,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className="w-60 hidden md:flex flex-col shrink-0 relative z-10"
+        className="w-56 hidden md:flex flex-col shrink-0 relative z-10"
         style={{
           background: "rgba(255,255,255,0.03)",
           backdropFilter: "blur(24px)",
@@ -31,7 +44,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         }}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center px-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="h-16 flex items-center px-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #a855f7, #00e5ff)" }}>
               <span className="text-xs font-black text-white">V</span>
@@ -45,6 +58,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const isActive = location === item.href || location.startsWith(item.href);
             const Icon = item.icon;
+            const rgb = getColorComponents(item.color);
             return (
               <Link
                 key={item.href}
@@ -53,9 +67,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 style={
                   isActive
                     ? {
-                        background: `rgba(${item.color === "#00e5ff" ? "0,229,255" : item.color === "#a855f7" ? "168,85,247" : item.color === "#f97316" ? "249,115,22" : item.color === "#ec4899" ? "236,72,153" : "52,211,153"},0.1)`,
-                        border: `1px solid ${item.color}40`,
-                        boxShadow: `0 0 20px ${item.glow}`,
+                        background: `rgba(${rgb},0.08)`,
+                        border: `1px solid ${item.color}35`,
+                        boxShadow: `0 0 16px ${item.glow}`,
                       }
                     : {
                         background: "transparent",
@@ -71,7 +85,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 )}
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
-                  style={isActive ? { background: `${item.color}18`, boxShadow: `0 0 10px ${item.glow}` } : { background: "rgba(255,255,255,0.04)" }}
+                  style={isActive ? { background: `${item.color}15`, boxShadow: `0 0 10px ${item.glow}` } : { background: "rgba(255,255,255,0.04)" }}
                 >
                   <Icon className="h-3.5 w-3.5" style={{ color: isActive ? item.color : "rgba(255,255,255,0.3)" }} />
                 </div>
@@ -89,7 +103,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Footer */}
         <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
           <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.12)" }}>
-            CRM v1.0
+            VELOXA CRM v1.5
           </p>
         </div>
       </aside>
@@ -117,7 +131,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
 
-        {/* Mobile bottom nav */}
+        {/* Mobile bottom nav — show 5 key items */}
         <nav
           className="flex md:hidden justify-around p-2 shrink-0"
           style={{
@@ -127,7 +141,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           {navItems.map((item) => {
-            const isActive = location === item.href;
+            const isActive = location === item.href || location.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link

@@ -26,9 +26,14 @@ export interface Owner {
   /** @nullable */
   website?: string | null;
   /** @nullable */
+  instagram?: string | null;
+  /** @nullable */
+  linkedin?: string | null;
+  /** @nullable */
   city?: string | null;
   /** @nullable */
   industry?: string | null;
   /** @nullable */
   socialLinks?: OwnerSocialLinks;
+  createdAt?: string;
 }

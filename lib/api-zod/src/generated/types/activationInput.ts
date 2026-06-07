@@ -5,20 +5,19 @@
  * VELOXA API
  * OpenAPI spec version: 0.1.0
  */
-import type { OwnerUpdateSocialLinks } from './ownerUpdateSocialLinks';
 
-export interface OwnerUpdate {
-  name?: string;
-  title?: string;
+export interface ActivationInput {
+  name: string;
   company?: string;
-  bio?: string;
-  avatarUrl?: string;
+  title?: string;
   phone?: string;
-  email?: string;
+  email: string;
   website?: string;
   instagram?: string;
   linkedin?: string;
   city?: string;
   industry?: string;
-  socialLinks?: OwnerUpdateSocialLinks;
+  bio?: string;
+  avatarUrl?: string;
+  password: string;
 }
