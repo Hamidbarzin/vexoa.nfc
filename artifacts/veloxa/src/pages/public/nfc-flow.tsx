@@ -59,6 +59,10 @@ export default function NfcFlow() {
     resolver: zodResolver(leadSchema),
   });
 
+  // ownerError must short-circuit before checking sponsorLoading.
+  // In TanStack Query v4, a disabled query still reports isLoading:true
+  // when it has no cached data — so we must not wait for it on error.
+
   const onSubmit = (data: LeadFormValues) => {
     if (!sponsor || !owner) {
       setStep("profile");
@@ -104,23 +108,42 @@ export default function NfcFlow() {
     URL.revokeObjectURL(url);
   };
 
-  if (ownerLoading || sponsorLoading) {
+  // Check owner error FIRST — before sponsor loading.
+  // A disabled TanStack Query v4 query reports isLoading:true when uncached,
+  // so we must never wait on sponsorLoading after an owner 404.
+  if (ownerError || (!ownerLoading && !owner)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "linear-gradient(160deg, #051a18 0%, #020808 100%)" }}>
-        <div className="w-14 h-14 rounded-full border-t-2 border-cyan-400 animate-spin mb-6" />
-        <p className="text-white/40 tracking-widest text-xs uppercase">Connecting</p>
+      <div
+        className="min-h-screen flex flex-col items-center justify-center text-center px-6"
+        style={{ background: "linear-gradient(135deg, #060010 0%, #000812 100%)" }}
+      >
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+        >
+          <span className="text-2xl font-bold text-white">V</span>
+        </div>
+        <h1 className="text-xl font-semibold text-white mb-2">Card Not Found</h1>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>This NFC card is inactive or does not exist.</p>
+        <a
+          href="/"
+          className="mt-8 px-5 py-2 rounded-xl text-sm font-semibold text-white"
+          style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)" }}
+        >
+          Go to VELOXA
+        </a>
       </div>
     );
   }
 
-  if (ownerError || !owner) {
+  if (ownerLoading || (!ownerError && !!owner?.id && sponsorLoading)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6" style={{ background: "linear-gradient(160deg, #051a18 0%, #020808 100%)" }}>
-        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
-          <span className="text-2xl font-bold text-white">V</span>
-        </div>
-        <h1 className="text-xl font-light text-white mb-2">Card Not Found</h1>
-        <p className="text-white/40 text-sm">This NFC card is inactive or invalid.</p>
+      <div
+        className="min-h-screen flex flex-col items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #060010 0%, #000812 100%)" }}
+      >
+        <div className="w-12 h-12 rounded-full border-t-2 border-purple-500 animate-spin mb-5" />
+        <p className="text-xs tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>Connecting</p>
       </div>
     );
   }
