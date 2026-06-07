@@ -1,0 +1,860 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: VELOXA API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: owners
+  - name: sponsors
+  - name: leads
+  - name: cards
+  - name: auth
+  - name: me
+  - name: admin
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /owners/{token}:
+    get:
+      operationId: getOwnerByToken
+      tags: [owners]
+      summary: Get owner profile by NFC token or username
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Owner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+        "404":
+          description: Not found
+
+  /owners/{id}/profile:
+    patch:
+      operationId: updateOwnerProfile
+      tags: [owners]
+      summary: Update owner profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OwnerUpdate"
+      responses:
+        "200":
+          description: Updated owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+
+  /sponsors/match:
+    get:
+      operationId: matchSponsor
+      tags: [sponsors]
+      summary: Get a matching sponsor for an owner
+      parameters:
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matched sponsor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sponsor"
+        "404":
+          description: No sponsor found
+
+  /sponsor-leads:
+    post:
+      operationId: createSponsorLead
+      tags: [leads]
+      summary: Submit a sponsor lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SponsorLeadInput"
+      responses:
+        "201":
+          description: Lead created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SponsorLead"
+
+  /cards/{token}/status:
+    get:
+      operationId: getCardStatus
+      tags: [cards]
+      summary: Check if a card is blank or active
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Card status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardStatus"
+        "404":
+          description: Card not found
+
+  /cards/{token}/activate:
+    post:
+      operationId: activateCard
+      tags: [cards]
+      summary: Activate a blank NFC card and create owner account
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivationInput"
+      responses:
+        "201":
+          description: Card activated, owner and account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivationResult"
+        "400":
+          description: Card already active or validation error
+        "404":
+          description: Card not found
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Owner login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  /me:
+    get:
+      operationId: getMe
+      tags: [me]
+      summary: Get logged-in owner profile
+      responses:
+        "200":
+          description: Owner profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+        "401":
+          description: Not authenticated
+
+  /me/profile:
+    patch:
+      operationId: updateMyProfile
+      tags: [me]
+      summary: Update logged-in owner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OwnerUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Owner"
+        "401":
+          description: Not authenticated
+
+  /admin/leads:
+    get:
+      operationId: adminGetLeads
+      tags: [admin]
+      summary: Get all sponsor leads
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sponsorId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: ownerId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SponsorLeadDetail"
+
+  /admin/leads/{id}/status:
+    patch:
+      operationId: adminUpdateLeadStatus
+      tags: [admin]
+      summary: Update lead status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadStatusUpdate"
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SponsorLead"
+
+  /admin/owners:
+    get:
+      operationId: adminGetOwners
+      tags: [admin]
+      summary: Get all owners
+      responses:
+        "200":
+          description: List of owners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OwnerWithCard"
+    post:
+      operationId: adminCreateOwner
+      tags: [admin]
+      summary: Create an owner and auto-generate NFC token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OwnerInput"
+      responses:
+        "201":
+          description: Owner created with NFC card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnerWithCard"
+
+  /admin/sponsors:
+    get:
+      operationId: adminGetSponsors
+      tags: [admin]
+      summary: Get all sponsors
+      responses:
+        "200":
+          description: List of sponsors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sponsor"
+    post:
+      operationId: adminCreateSponsor
+      tags: [admin]
+      summary: Create a sponsor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SponsorInput"
+      responses:
+        "201":
+          description: Sponsor created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sponsor"
+
+  /admin/cards:
+    get:
+      operationId: adminGetCards
+      tags: [admin]
+      summary: Get all NFC cards
+      responses:
+        "200":
+          description: List of NFC cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NfcCardDetail"
+    post:
+      operationId: adminCreateBlankCard
+      tags: [admin]
+      summary: Create a blank unactivated NFC card
+      responses:
+        "201":
+          description: Blank card created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NfcCardDetail"
+
+  /admin/cards/{id}/status:
+    patch:
+      operationId: adminUpdateCardStatus
+      tags: [admin]
+      summary: Update NFC card status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardStatusUpdate"
+      responses:
+        "200":
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NfcCardDetail"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Get dashboard stats
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/crm/contacts:
+    get:
+      operationId: adminGetCrmContacts
+      tags: [admin]
+      summary: Get all CRM contacts (activated owners)
+      responses:
+        "200":
+          description: List of CRM contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CrmContact"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    Owner:
+      type: object
+      required: [id, username, name]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        title:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        instagram:
+          type: ["string", "null"]
+        linkedin:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        socialLinks:
+          type: ["object", "null"]
+        createdAt:
+          type: string
+
+    OwnerWithCard:
+      type: object
+      required: [id, username, name, nfcToken, profileUrl]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        title:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        socialLinks:
+          type: ["object", "null"]
+        nfcToken:
+          type: string
+        profileUrl:
+          type: string
+
+    OwnerInput:
+      type: object
+      required: [name, username]
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        bio:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        city:
+          type: string
+        industry:
+          type: string
+
+    OwnerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        instagram:
+          type: string
+        linkedin:
+          type: string
+        city:
+          type: string
+        industry:
+          type: string
+        socialLinks:
+          type: object
+
+    Sponsor:
+      type: object
+      required: [id, name, tagline, ctaText, ctaUrl]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        tagline:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        bgImageUrl:
+          type: ["string", "null"]
+        teaserImageUrl:
+          type: ["string", "null"]
+        ctaText:
+          type: string
+        ctaUrl:
+          type: string
+        targetCategories:
+          type: ["array", "null"]
+          items:
+            type: string
+
+    SponsorInput:
+      type: object
+      required: [name, tagline, ctaText, ctaUrl]
+      properties:
+        name:
+          type: string
+        tagline:
+          type: string
+        logoUrl:
+          type: string
+        bgImageUrl:
+          type: string
+        teaserImageUrl:
+          type: string
+        ctaText:
+          type: string
+        ctaUrl:
+          type: string
+        targetCategories:
+          type: array
+          items:
+            type: string
+
+    SponsorLead:
+      type: object
+      required: [id, sponsorId, ownerId, name, email, status, createdAt]
+      properties:
+        id:
+          type: integer
+        sponsorId:
+          type: integer
+        ownerId:
+          type: integer
+        nfcToken:
+          type: ["string", "null"]
+        sourceUsername:
+          type: ["string", "null"]
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+        createdAt:
+          type: string
+
+    SponsorLeadInput:
+      type: object
+      required: [sponsorId, ownerId, name, email]
+      properties:
+        sponsorId:
+          type: integer
+        ownerId:
+          type: integer
+        nfcToken:
+          type: string
+        sourceUsername:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    SponsorLeadDetail:
+      type: object
+      required: [id, sponsorId, ownerId, name, email, status, createdAt]
+      properties:
+        id:
+          type: integer
+        sponsorId:
+          type: integer
+        ownerId:
+          type: integer
+        nfcToken:
+          type: ["string", "null"]
+        sourceUsername:
+          type: ["string", "null"]
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+        createdAt:
+          type: string
+        sponsorName:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+
+    LeadStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    NfcCardDetail:
+      type: object
+      required: [id, token, status, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: ["integer", "null"]
+        token:
+          type: string
+        status:
+          type: string
+          enum: [blank, active, lost, suspended]
+        activatedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        ownerName:
+          type: ["string", "null"]
+        ownerUsername:
+          type: ["string", "null"]
+        profileUrl:
+          type: ["string", "null"]
+
+    CardStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [blank, active, lost, suspended]
+
+    CardStatus:
+      type: object
+      required: [token, status]
+      properties:
+        token:
+          type: string
+        status:
+          type: string
+          enum: [blank, active, lost, suspended]
+        ownerId:
+          type: ["integer", "null"]
+
+    ActivationInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        instagram:
+          type: string
+        linkedin:
+          type: string
+        city:
+          type: string
+        industry:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+        password:
+          type: string
+
+    ActivationResult:
+      type: object
+      required: [ownerId, userId, token, profileUrl, email, name, role]
+      properties:
+        ownerId:
+          type: integer
+        userId:
+          type: integer
+        token:
+          type: string
+        profileUrl:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResult:
+      type: object
+      required: [ownerId, name, email]
+      properties:
+        ownerId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+    CrmContact:
+      type: object
+      required: [id, name, source, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: ["integer", "null"]
+        name:
+          type: string
+        company:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        source:
+          type: string
+        nfcToken:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AdminStats:
+      type: object
+      required: [totalLeads, totalOwners, totalSponsors, newLeadsToday]
+      properties:
+        totalLeads:
+          type: integer
+        totalOwners:
+          type: integer
+        totalSponsors:
+          type: integer
+        newLeadsToday:
+          type: integer
+        leadsByStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer

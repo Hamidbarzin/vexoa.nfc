@@ -1,0 +1,252 @@
+Important Phase 1.5 requirement:
+
+We need a proper NFC card activation flow.
+
+Currently the admin can create owners and cards, but the first-time customer experience is missing.
+
+Build this carefully and keep it simple.
+
+==================================================
+
+NEW FLOW: FIRST TIME NFC ACTIVATION
+
+When a customer taps a new NFC card for the first time:
+
+/activate/:token
+
+The system checks the NFC token.
+
+If token exists and is not activated:
+
+Show an activation form.
+
+The customer fills:
+
+* Full name
+* Company name
+* Title
+* Phone
+* Email
+* Website
+* Instagram
+* LinkedIn
+* City
+* Industry
+* Bio
+* Profile photo upload optional
+* Password
+* Confirm password
+
+After submit:
+
+1. Create or update Owner profile
+2. Attach Owner to this NFC card
+3. Mark NFC card as ACTIVE
+4. Create login account for Owner
+5. Save all customer information in CRM
+6. Redirect to /login or /profile/settings
+
+==================================================
+
+IF CARD IS ALREADY ACTIVE
+
+If the NFC card is already active:
+
+Redirect to:
+
+/u/:token
+
+==================================================
+
+OWNER LOGIN SYSTEM
+
+Create simple owner login.
+
+Routes:
+
+/login
+/profile/settings
+
+Owner logs in with:
+
+* email
+* password
+
+After login:
+
+Owner can edit:
+
+* name
+* company
+* title
+* phone
+* email
+* website
+* social links
+* city
+* industry
+* bio
+* profile photo
+
+==================================================
+
+CRM REQUIREMENT
+
+Every customer who activates a card must be saved into CRM.
+
+Create CRM record with:
+
+* owner_id
+* name
+* company
+* email
+* phone
+* city
+* industry
+* source = "NFC Activation"
+* nfc_token
+* created_at
+
+This is important because VELOXA is also our CRM.
+
+==================================================
+
+DATABASE UPDATES
+
+Add or update tables:
+
+users
+
+* id
+* owner_id
+* email
+* password_hash
+* role = OWNER
+* created_at
+
+owners
+
+* id
+* user_id
+* name
+* company
+* title
+* phone
+* email
+* website
+* instagram
+* linkedin
+* city
+* industry
+* bio
+* profile_photo_url
+* created_at
+* updated_at
+
+nfc_cards
+
+* id
+* token
+* owner_id
+* status = blank | active | lost | suspended
+* activated_at
+* created_at
+
+crm_contacts
+
+* id
+* owner_id
+* name
+* company
+* email
+* phone
+* city
+* industry
+* source
+* nfc_token
+* created_at
+
+==================================================
+
+API ROUTES
+
+GET /api/cards/:token/status
+
+Checks if card exists and whether it is blank or active.
+
+POST /api/cards/:token/activate
+
+Activates card and creates owner account.
+
+POST /api/auth/login
+
+Owner login.
+
+GET /api/me
+
+Returns logged-in owner profile.
+
+PATCH /api/me/profile
+
+Updates owner profile.
+
+GET /api/admin/crm/contacts
+
+Admin can see all activated owners/customers in CRM.
+
+==================================================
+
+FRONTEND ROUTES
+
+/activate/:token
+First-time activation form.
+
+/login
+Owner login.
+
+/profile/settings
+Owner profile settings after login.
+
+/u/:token
+Public NFC profile.
+
+Admin:
+
+/admin/crm
+Shows activated owners/customers captured from activation.
+
+==================================================
+
+IMPORTANT RULES
+
+Do not build complex auth.
+
+Do not build multi-role enterprise auth yet.
+
+Keep it simple:
+
+* Admin pages can stay simple for now.
+* Owner login is only for editing their own profile.
+
+Password must be hashed in backend.
+
+Never store plain password.
+
+==================================================
+
+TEST FLOW
+
+1. Admin creates blank NFC card.
+2. System generates token.
+3. Visit /activate/:token.
+4. Fill activation form.
+5. Owner account is created.
+6. Card status becomes ACTIVE.
+7. CRM contact is created.
+8. Login with email/password.
+9. Edit profile in /profile/settings.
+10. Visit /u/:token and confirm updated info appears.
+
+Build only this flow first.
+
+Do not build Sponsor Portal, Marketplace, Payments, or Referral yet.
