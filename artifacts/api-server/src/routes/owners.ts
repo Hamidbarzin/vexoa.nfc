@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { ownersTable, nfcCardsTable } from "@workspace/db/schema";
 import {
   GetOwnerByTokenParams,
-  UpdateOwnerProfileParams,
   UpdateOwnerProfileBody,
 } from "@workspace/api-zod";
 
@@ -68,10 +67,20 @@ router.get("/owners/:token", async (req, res) => {
   });
 });
 
-router.patch("/owners/:id/profile", async (req, res) => {
-  const params = UpdateOwnerProfileParams.safeParse(req.params);
-  if (!params.success) {
-    res.status(400).json({ error: "Invalid params" });
+router.patch("/owners/:id/profile", async (req: any, res: any) => {
+  if (!req.session?.ownerId) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  if (req.session.ownerId !== id) {
+    res.status(403).json({ error: "Forbidden" });
     return;
   }
 
@@ -84,7 +93,7 @@ router.patch("/owners/:id/profile", async (req, res) => {
   const updated = await db
     .update(ownersTable)
     .set(body.data)
-    .where(eq(ownersTable.id, params.data.id))
+    .where(eq(ownersTable.id, id))
     .returning();
 
   if (!updated[0]) {
